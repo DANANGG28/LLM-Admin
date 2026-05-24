@@ -1,0 +1,9 @@
+google-adk
+google-generativeai
+chromadb
+fastapi
+uvicorn
+gspread
+google-auth
+python-dotenv
+requests
