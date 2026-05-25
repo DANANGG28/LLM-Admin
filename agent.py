@@ -1,5 +1,4 @@
 import os
-import json
 from datetime import datetime
 from dotenv import load_dotenv
 from google import genai
@@ -32,14 +31,14 @@ def get_agent_response(user_message: str, session_id: str) -> str:
                 resp = f"Halo! {product_info.get('nama', '')} tersedia dengan harga:\n\n"
                 
                 if product_info.get('harga_ecer'):
-                    resp += f"• Ecer  : Rp {product_info['harga_ecer']:,}/pcs\n"
+                    resp += f"• Ecer  : Rp {product_info['harga_ecer']}/pcs\n"
                 
                 if product_info.get('harga_lusin'):
-                    resp += f"• Lusin : Rp {product_info['harga_lusin']:,} (12 pcs)\n"
+                    resp += f"• Lusin : Rp {product_info['harga_lusin']} (12 pcs)\n"
                 
                 if product_info.get('harga_kolian'):
                     isi_kolian = product_info.get('isi_kolian', '?')
-                    resp += f"• Kolian: Rp {product_info['harga_kolian']:,} ({isi_kolian} pcs)\n"
+                    resp += f"• Kolian: Rp {product_info['harga_kolian']} ({isi_kolian} pcs)\n"
                 
                 if product_info.get('stok'):
                     resp += f"\n📦 Stok: {product_info['stok']} pcs tersedia"
@@ -51,7 +50,19 @@ def get_agent_response(user_message: str, session_id: str) -> str:
         else:
             kb_result = search_knowledge_base(user_message)
             if kb_result and kb_result != "Informasi tidak tersedia":
-                response = kb_result + "\n\nAda yang lain bisa dibantu? 😊"
+                prompt = f"""Berdasarkan informasi berikut:
+{kb_result}
+
+Jawab pertanyaan customer ini secara singkat, ramah, dan natural (max 4 kalimat):
+"{user_message}"
+
+Jangan tampilkan format markdown atau header. Jawab langsung ke intinya."""
+                
+                gemini_response = client.models.generate_content(
+                    model="gemini-1.5-flash",
+                    contents=prompt
+                )
+                response = gemini_response.text
             else:
                 response = "Maaf, pertanyaan ini diluar layanan toko kami. Silakan hubungi admin untuk bantuan lebih lanjut 😊"
         

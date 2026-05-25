@@ -14,6 +14,10 @@ app = FastAPI(title="Toko Bot")
 def health():
     return {"status": "running", "timestamp": str(datetime.now())}
 
+@app.get("/webhook")
+def webhook_get():
+    return {"status": "ok", "message": "webhook active"}
+
 @app.post("/webhook")
 async def webhook(request: Request):
     try:
